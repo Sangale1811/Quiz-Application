@@ -10,9 +10,8 @@ function loadQuiz() {
     if (currentQuiz < quizData.length) {
         const currentQuizData = quizData[currentQuiz];
         const questionEl = document.getElementById('question');
-        questionEl.innerText = currentQuizData.question;
+        questionEl.innerText = currentQuizData.question.replace('&quot;', '"');
 
-        const answerEls = document.querySelectorAll('.answer');
         const progress = document.getElementById('progress');
         const a_text = document.getElementById('a_text');
         const b_text = document.getElementById('b_text');
@@ -30,6 +29,7 @@ function loadQuiz() {
         c_text.innerText = answers[2].replace('&quot;', '"');
         d_text.innerText = answers[3].replace('&quot;', '"');
     } else {
+        currentQuiz = -1;
         quiz.innerHTML = `
            <h2>You answered ${score}/${quizData.length} questions correctly</h2>
            <button onclick="location.reload()">Reload</button>
@@ -46,10 +46,12 @@ function deselectAnswers() {
 
 function getSelected() {
     let answer = '';
+    let label = "";
     const answerEls = document.querySelectorAll('.answer');
     answerEls.forEach(answerEl => {
         if (answerEl.checked) {
-            answer = answerEl.id;
+            label = document.querySelector(`label[for="${answerEl.id}"]`);
+            answer = label.textContent;
         }
     });
     return answer;
@@ -68,7 +70,7 @@ function shuffleArray(array) {
 }
 
 function fetchQuizData() {
-    fetch('https://opentdb.com/api.php?amount=10&difficulty=easy&type=multiple')
+    fetch('https://opentdb.com/api.php?amount=10&category=18&difficulty=easy&type=multiple')
         .then(response => response.json())
         .then(data => {
             quizData = data.results.map(result => {
@@ -90,13 +92,16 @@ fetchQuizData();
 submitBtn.addEventListener('click', () => {
     const answer = getSelected();
     if (answer) {
-        if (answer === quizData[currentQuiz].correct) {
+        if (answer === quizData[currentQuiz].correct.replace('&quot;', '"')) {
             score++;
         }
         currentQuiz++;
         loadQuiz();
     }
 });
-window.onbeforeunload = function () {
-    return "Data will be lost if you leave the page, are you sure?";
-};
+
+
+// For further use
+// window.onbeforeunload = function () {
+//     return "Data will be lost if you leave the page, are you sure?";
+// };
