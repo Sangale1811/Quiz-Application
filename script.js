@@ -24,11 +24,11 @@ function loadQuiz() {
         ];
         answers = shuffleArray(answers[0]);
 
-        progress.innerText = ""+(currentQuiz+1)+"/10"; 
-        a_text.innerText = answers[0].replace('&quot;','"');
-        b_text.innerText = answers[1].replace('&quot;','"');
-        c_text.innerText = answers[2].replace('&quot;','"');
-        d_text.innerText = answers[3].replace('&quot;','"');
+        progress.innerText = "" + (currentQuiz + 1) + "/10";
+        a_text.innerText = answers[0].replace('&quot;', '"');
+        b_text.innerText = answers[1].replace('&quot;', '"');
+        c_text.innerText = answers[2].replace('&quot;', '"');
+        d_text.innerText = answers[3].replace('&quot;', '"');
     } else {
         quiz.innerHTML = `
            <h2>You answered ${score}/${quizData.length} questions correctly</h2>
@@ -56,14 +56,14 @@ function getSelected() {
 }
 
 function shuffleArray(array) {
-    for (var i = array.length - 1; i > 0; i--) { 
+    for (var i = array.length - 1; i > 0; i--) {
         var j = Math.floor(Math.random() * (i + 1));
-                   
+
         var temp = array[i];
         array[i] = array[j];
         array[j] = temp;
     }
-       
+
     return array;
 }
 
@@ -97,3 +97,6 @@ submitBtn.addEventListener('click', () => {
         loadQuiz();
     }
 });
+window.onbeforeunload = function () {
+    return "Data will be lost if you leave the page, are you sure?";
+};
