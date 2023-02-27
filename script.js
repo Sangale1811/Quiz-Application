@@ -1,91 +1,107 @@
-const quizData = [
-    {
-        question: "What does HTML stand for?",
-        a: "Hypertext Markup Language",
-        b: "Hypertext Markdown Language",
-        c: "Hyperloop Machine Language",
-        d: "Helicopters Terminals Motorboats Lamborginis",
-        correct: "a",
-    },
-    {
-        question: "Which language runs in a web browser?",
-        a: "Java",
-        b: "C",
-        c: "Python",
-        d: "javascript",
-        correct: "d",
-    },
-    {
-        question: "What does CSS stand for?",
-        a: "Central Style Sheets",
-        b: "Cascading Style Sheets",
-        c: "Cascading Simple Sheets",
-        d: "Cars SUVs Sailboats",
-        correct: "b",
-    },
-    {
-        question: "Which of the following methods is used to access HTML elements using Javascript",
-        a: "getElementbyId()",
-        b: "getElementsByClassName()",
-        c: "Both a and b",
-        d: "none of the above",
-        correct: "c",
-    },
-    {
-        question: "Which of the following are closures in Javascript?",
-        a:"Variables",
-        b:"Functions",
-        c:"Objects",
-        d:"All of the above",
-        correct: "d"
-    }
-];
-const quiz= document.getElementById('quiz')
-const answerEls = document.querySelectorAll('.answer')
-const questionEl = document.getElementById('question')
-const a_text = document.getElementById('a_text')
-const b_text = document.getElementById('b_text')
-const c_text = document.getElementById('c_text')
-const d_text = document.getElementById('d_text')
-const submitBtn = document.getElementById('submit')
-let currentQuiz = 0
-let score = 0
-loadQuiz()
+const quiz = document.getElementById('quiz');
+const submitBtn = document.getElementById('submit');
+let currentQuiz = 0;
+let score = 0;
+let quizData = [];
+
 function loadQuiz() {
-    deselectAnswers()
-    const currentQuizData = quizData[currentQuiz]
-    questionEl.innerText = currentQuizData.question
-    a_text.innerText = currentQuizData.a
-    b_text.innerText = currentQuizData.b
-    c_text.innerText = currentQuizData.c
-    d_text.innerText = currentQuizData.d
-}
-function deselectAnswers() {
-    answerEls.forEach(answerEl => answerEl.checked = false)
-}
-function getSelected() {
-    let answer
-    answerEls.forEach(answerEl => {
-        if(answerEl.checked) {
-            answer = answerEl.id
-        }
-    })
-    return answer
-}
-submitBtn.addEventListener('click', () => {
-    const answer = getSelected()
-    if(answer) {
-       if(answer === quizData[currentQuiz].correct) {
-           score++
-       }
-       currentQuiz++
-       if(currentQuiz < quizData.length) {
-           loadQuiz()
-       } else {
-           quiz.innerHTML = `
+    deselectAnswers();
+
+    if (currentQuiz < quizData.length) {
+        const currentQuizData = quizData[currentQuiz];
+        const questionEl = document.getElementById('question');
+        questionEl.innerText = currentQuizData.question.replace('&quot;', '"');
+
+        const progress = document.getElementById('progress');
+        const a_text = document.getElementById('a_text');
+        const b_text = document.getElementById('b_text');
+        const c_text = document.getElementById('c_text');
+        const d_text = document.getElementById('d_text');
+
+        let answers = [
+            currentQuizData.answers
+        ];
+        answers = shuffleArray(answers[0]);
+
+        progress.innerText = "" + (currentQuiz + 1) + "/10";
+        a_text.innerText = answers[0].replace('&quot;', '"');
+        b_text.innerText = answers[1].replace('&quot;', '"');
+        c_text.innerText = answers[2].replace('&quot;', '"');
+        d_text.innerText = answers[3].replace('&quot;', '"');
+    } else {
+        currentQuiz = -1;
+        quiz.innerHTML = `
            <h2>You answered ${score}/${quizData.length} questions correctly</h2>
            <button onclick="location.reload()">Reload</button>
-           `
-       }
+           `;
     }
-})
+}
+
+function deselectAnswers() {
+    const answerEls = document.querySelectorAll('.answer');
+    answerEls.forEach(answerEl => {
+        answerEl.checked = false;
+    });
+}
+
+function getSelected() {
+    let answer = '';
+    let label = "";
+    const answerEls = document.querySelectorAll('.answer');
+    answerEls.forEach(answerEl => {
+        if (answerEl.checked) {
+            label = document.querySelector(`label[for="${answerEl.id}"]`);
+            answer = label.textContent;
+        }
+    });
+    return answer;
+}
+
+function shuffleArray(array) {
+    for (var i = array.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+
+    return array;
+}
+
+function fetchQuizData() {
+    fetch('https://opentdb.com/api.php?amount=10&category=18&difficulty=easy&type=multiple')
+        .then(response => response.json())
+        .then(data => {
+            quizData = data.results.map(result => {
+                const question = result.question;
+                const correctAnswer = result.correct_answer;
+                const incorrectAnswers = result.incorrect_answers;
+                return {
+                    question: question,
+                    answers: [...incorrectAnswers, correctAnswer],
+                    correct: correctAnswer
+                };
+            });
+            loadQuiz();
+        });
+}
+
+fetchQuizData();
+
+submitBtn.addEventListener('click', () => {
+    const answer = getSelected();
+    if (answer) {
+        if (answer === quizData[currentQuiz].correct.replace('&quot;', '"')) {
+            score++;
+        }
+        currentQuiz++;
+        loadQuiz();
+    }
+});
+
+
+// For further use
+// window.onbeforeunload = function () {
+//     return "Data will be lost if you leave the page, are you sure?";
+// };
