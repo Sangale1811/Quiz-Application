@@ -10,7 +10,7 @@ function loadQuiz() {
     if (currentQuiz < quizData.length) {
         const currentQuizData = quizData[currentQuiz];
         const questionEl = document.getElementById('question');
-        questionEl.innerText = currentQuizData.question.replace('&quot;', '"');
+        questionEl.innerText = decodeHtmlEntities(currentQuizData.question);
 
         const progress = document.getElementById('progress');
         const a_text = document.getElementById('a_text');
@@ -24,10 +24,10 @@ function loadQuiz() {
         answers = shuffleArray(answers[0]);
 
         progress.innerText = "" + (currentQuiz + 1) + "/10";
-        a_text.innerText = answers[0].replace('&quot;', '"');
-        b_text.innerText = answers[1].replace('&quot;', '"');
-        c_text.innerText = answers[2].replace('&quot;', '"');
-        d_text.innerText = answers[3].replace('&quot;', '"');
+        a_text.innerText = decodeHtmlEntities(answers[0]);
+        b_text.innerText = decodeHtmlEntities(answers[1]);
+        c_text.innerText = decodeHtmlEntities(answers[2]);
+        d_text.innerText = decodeHtmlEntities(answers[3]);
     } else {
         currentQuiz = -1;
         quiz.innerHTML = `
@@ -86,6 +86,13 @@ function fetchQuizData() {
             loadQuiz();
         });
 }
+
+function decodeHtmlEntities(text) {
+    let element = document.createElement('div');
+    element.innerHTML = text;
+    return element.textContent;
+}
+
 
 fetchQuizData();
 
